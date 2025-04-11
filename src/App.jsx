@@ -33,8 +33,9 @@ function App() {
           <Container>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/students" element={<StudentManagement />} />
 
-              {/* <Route path="/students" element={<StudentManagement />} />
+              {/* 
               <Route path="/courses/:studentId" element={<CourseManagement />} />
               <Route path="/student/:studentId" element={<StudentDetails />} /> */}
 
