@@ -1,25 +1,27 @@
 const theme = {
     colors: {
-      brand: "#2563eb", // Tailwind blue-600
-      brandHover: "#1d4ed8", // Darker blue for hover
-      grayLight: "#f3f4f6", // Tailwind gray-100
-      grayText: "#4b5563", // Tailwind gray-600
-      white: "#ffffff",
-      green: "#16a34a", // Tailwind green-600
-      yellow: "#d97706", // Tailwind yellow-600
-      red: "#dc2626", // Tailwind red-600
+      primary: "#011082", // Deep blue for headers, buttons
+      secondary: "#344afb", // Vibrant blue for hover states, accents
+      textSecondary: "#546084", // Muted blue-gray for secondary text
+      white: "#ffffff", // White for card backgrounds
+      textPrimary: "#434345", // Dark gray for primary text
     },
     spacing: {
-      sm: "0.5rem", // 8px
-      md: "1rem", // 16px
-      lg: "1.5rem", // 24px
+      xs: "0.5rem", // 8px
+      sm: "1rem", // 16px (card padding, gaps)
+      md: "1.5rem", // 24px (section margins)
     },
     radii: {
-      md: "0.375rem", // 6px, like Tailwind rounded-md
+      md: "0.5rem", // 8px, matching the dashboard's rounded corners
     },
     shadows: {
-      md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // Tailwind shadow-md
-      lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)", // Tailwind shadow-lg
+      sm: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for cards
+    },
+    fontSizes: {
+      heading: "1.875rem", // 30px
+      subheading: "1.5rem", // 24px
+      cardTitle: "1.25rem", // 20px
+      body: "1rem", // 16px
     },
   };
   

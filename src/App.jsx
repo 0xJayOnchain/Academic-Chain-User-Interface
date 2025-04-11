@@ -1,24 +1,48 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
+import StudentManagement from "./pages/StudentManagement";
+import CourseManagement from "./pages/CourseManagement";
+import StudentDetails from "./pages/StudentDetails";
 
-const Container = styled.div`
-  min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.grayLight};
+const AppWrapper = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 100vh;
+  background-color: ${({ theme }) => theme.colors.white};
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: ${({ theme }) => theme.colors.brand};
+const MainContent = styled.main`
+  flex: 1;
+  padding: ${({ theme }) => theme.spacing.md};
+`;
+
+const Container = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
 `;
 
 function App() {
   return (
-    <Container>
-      <Title>AcademicChain UI</Title>
-    </Container>
+    <Router>
+      <AppWrapper>
+        <Sidebar />
+        <MainContent>
+          <Navbar />
+          <Container>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+
+              {/* <Route path="/students" element={<StudentManagement />} />
+              <Route path="/courses/:studentId" element={<CourseManagement />} />
+              <Route path="/student/:studentId" element={<StudentDetails />} /> */}
+
+            </Routes>
+          </Container>
+        </MainContent>
+      </AppWrapper>
+    </Router>
   );
 }
 
