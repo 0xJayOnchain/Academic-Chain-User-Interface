@@ -38,8 +38,8 @@ const CardText = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing.xs};
 `;
 
-const Button = styled(RouterLink)`
-  background-color: ${({ color, theme }) => color || theme.colors.primary};
+const StyledButton = styled(RouterLink)`
+  background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.white};
   padding: ${({ theme }) => theme.spacing.xs};
   border-radius: ${({ theme }) => theme.radii.md};
@@ -75,32 +75,57 @@ const Spinner = styled.div`
   }
 `;
 
+const EmptyState = styled.div`
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing.md};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 function StudentDetails() {
   const { studentId } = useParams();
   const [student, setStudent] = useState(null);
   const [gpa, setGpa] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchStudent = async () => {
       try {
+        setLoading(true);
         const contract = await getContract();
         const studentData = await contract.getStudentData(studentId);
+        
+        
         setStudent({
           name: studentData.name,
-          age: studentData.age,
+          age: studentData.age.toString(), 
           wallet: studentData.wallet,
-          courses: studentData.courses,
+          courses: Array.isArray(studentData.courses) 
+            ? studentData.courses.map(course => ({
+                name: course.name,
+                credits: Number(course.credits),
+                grade: course.grade
+              }))
+            : []
         });
+        
         const gpaData = await contract.getGPA(studentId);
-        setGpa((gpaData / 100).toFixed(2));
+        setGpa((Number(gpaData) / 100).toFixed(2));
+        
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching student data:", error);
+        setError("Failed to load student data. Please try again later.");
+        setLoading(false);
       }
     };
+    
     fetchStudent();
   }, [studentId]);
 
-  if (!student) return <Spinner />;
+  if (loading) return <Spinner />;
+  if (error) return <EmptyState>{error}</EmptyState>;
+  if (!student) return <EmptyState>Student not found</EmptyState>;
 
   return (
     <div>
@@ -110,21 +135,25 @@ function StudentDetails() {
         <CardText>Age: {student.age}</CardText>
         <CardText>Wallet: {student.wallet.slice(0, 6)}...{student.wallet.slice(-4)}</CardText>
         <CardText>GPA: {gpa || "N/A"}</CardText>
-        <Button to={`/courses/${studentId}`} color={theme.colors.primary}>
+        <StyledButton to={`/courses/${studentId}`}>
           Manage Courses
-        </Button>
+        </StyledButton>
       </Card>
 
       <SubHeading>Courses</SubHeading>
-      <Grid>
-        {student.courses.map((course, index) => (
-          <Card key={index}>
-            <CardTitle>{course.name}</CardTitle>
-            <CardText>Credits: {course.credits}</CardText>
-            <CardText>Grade: {course.grade}</CardText>
-          </Card>
-        ))}
-      </Grid>
+      {student.courses && student.courses.length > 0 ? (
+        <Grid>
+          {student.courses.map((course, index) => (
+            <Card key={index}>
+              <CardTitle>{course.name}</CardTitle>
+              <CardText>Credits: {course.credits}</CardText>
+              <CardText>Grade: {course.grade}</CardText>
+            </Card>
+          ))}
+        </Grid>
+      ) : (
+        <EmptyState>No courses enrolled</EmptyState>
+      )}
     </div>
   );
 }
