@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import styled from "styled-components";
 import { getContract } from "../utils/contract";
+import { ethers } from "ethers";
 
 const Heading = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.heading};
@@ -104,34 +105,217 @@ const Spinner = styled.div`
   }
 `;
 
+const ErrorMessage = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 1rem;
+  text-align: center;
+  margin: ${({ theme }) => theme.spacing.md} 0;
+`;
+
+const Button = styled.button`
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.white};
+  padding: ${({ theme }) => theme.spacing.xs};
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-weight: 500;
+  cursor: pointer;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.secondary};
+  }
+`;
+
 function Dashboard() {
   const [student, setStudent] = useState(null);
   const [gpa, setGpa] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [studentId, setStudentId] = useState(null);
+  const [error, setError] = useState(null);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+
+  const BASE_SEPOLIA_CHAIN_ID = "0x14a34"; // Chain ID 84532 in hex
+
+  const checkWalletAndNetwork = async () => {
+    if (!window.ethereum) {
+      setError("No Ethereum provider found. Please install MetaMask or another wallet.");
+      setLoading(false);
+      return false;
+    }
+
+    try {
+      // Check if wallet is connected
+      const accounts = await window.ethereum.request({ method: "eth_accounts" });
+      if (accounts.length === 0) {
+        console.log('No accounts found');
+        setError("No signer available. Please connect your wallet.");
+        setIsWalletConnected(false);
+        setLoading(false);
+        return false;
+      }
+      setIsWalletConnected(true);
+
+      // Check if the wallet is on the correct network (Base Sepolia)
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
+        setError("Please switch to the Base Sepolia network (Chain ID: 84532).");
+        setIsCorrectNetwork(false);
+        setLoading(false);
+        return false;
+      }
+      setIsCorrectNetwork(true);
+      return true;
+    } catch (err) {
+      setError("Failed to check wallet or network status. Please try again.");
+      setLoading(false);
+      return false;
+    }
+  };
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      setError("No Ethereum provider found. Please install MetaMask or another wallet.");
+      return;
+    }
+
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      setError(null);
+      setIsWalletConnected(true);
+      checkNetworkAndFetch();
+    } catch (err) {
+      setError("Failed to connect wallet. Please try again.");
+    }
+  };
+
+  const switchNetwork = async () => {
+    if (!window.ethereum) {
+      setError("No Ethereum provider found. Please install MetaMask or another wallet.");
+      return;
+    }
+
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+      });
+      setError(null);
+      setIsCorrectNetwork(true);
+      fetchStudent();
+    } catch (switchError) {
+      // If the network isn't available in MetaMask, add it
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: BASE_SEPOLIA_CHAIN_ID,
+                chainName: "Base Sepolia",
+                rpcUrls: ["https://sepolia.base.org"],
+                nativeCurrency: {
+                  name: "ETH",
+                  symbol: "ETH",
+                  decimals: 18,
+                },
+                blockExplorerUrls: ["https://sepolia.basescan.org"],
+              },
+            ],
+          });
+          setError(null);
+          setIsCorrectNetwork(true);
+          fetchStudent();
+        } catch (addError) {
+          setError("Failed to add Base Sepolia network. Please add it manually.");
+        }
+      } else {
+        setError("Failed to switch to Base Sepolia network. Please try again.");
+      }
+    }
+  };
+
+  const fetchStudent = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Get the signer directly from the provider
+      if (!window.ethereum) {
+        throw new Error("No Ethereum provider found");
+      }
+      
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const signerAddress = await signer.getAddress();
+      
+      // Now get the contract
+      const contract = await getContract();
+      
+      const studentCount = await contract.studentCount();
+
+      // Loop through all students to find the one matching the signer's wallet
+      // Lets force student for now
+      const data = await contract.getStudentData(1);
+      let studentData = data;
+      let foundStudentId = 1;
+        // Uncomment this block to loop through all students
+    //   let studentData = null;
+    //   let foundStudentId = null;
+    //   for (let i = 0; i < Number(studentCount); i++) {
+    //     const data = await contract.getStudentData(i);
+    //     if (data.wallet.toLowerCase() === signerAddress.toLowerCase() && data.exists) {
+    //       studentData = data;
+    //       foundStudentId = i;
+    //       break;
+    //     }
+    //   }
+
+      // Rest of your function remains the same
+      if (!studentData) {
+        throw new Error("No student found for this wallet address.");
+      }
+
+      setStudent({
+        name: studentData.name,
+        age: studentData.age,
+        wallet: studentData.wallet,
+        courses: studentData.courses,
+      });
+      setStudentId(foundStudentId);
+
+      const gpaData = await contract.getGPA(foundStudentId);
+      setGpa((Number(gpaData) / 100).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+      setError(error.message || "Failed to fetch student data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkNetworkAndFetch = async () => {
+    const isReady = await checkWalletAndNetwork();
+    if (isReady) {
+      fetchStudent();
+    }
+  };
 
   useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const contract = await getContract();
-        const signer = await contract.signer.getAddress();
-        // Assume studentId 0 for demo; adjust based on user
-        const studentData = await contract.getStudentData(0);
-        setStudent({
-          name: studentData.name,
-          age: studentData.age,
-          wallet: studentData.wallet,
-          courses: studentData.courses,
-        });
-        const gpaData = await contract.getGPA(0);
-        setGpa((gpaData / 100).toFixed(2));
-      } catch (error) {
-        console.error("Error fetching student data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudent();
+    checkNetworkAndFetch();
   }, []);
+
+  if (error) {
+    return (
+      <div>
+        <ErrorMessage>{error}</ErrorMessage>
+        {!isWalletConnected && (
+          <Button onClick={connectWallet}>Connect Wallet</Button>
+        )}
+        {isWalletConnected && !isCorrectNetwork && (
+          <Button onClick={switchNetwork}>Switch to Base Sepolia</Button>
+        )}
+      </div>
+    );
+  }
 
   if (loading || !student) return <Spinner />;
 
@@ -154,7 +338,7 @@ function Dashboard() {
         <StatCard>
           <StatValue>{gpa || "N/A"}</StatValue>
           <StatLabel>GPA</StatLabel>
-          <Link to="/student/0">Go to report</Link>
+          <Link to={`/student/${studentId}`}>Go to report</Link>
         </StatCard>
       </StatsGrid>
 
@@ -166,13 +350,13 @@ function Dashboard() {
               {course.name} - Credits: {course.credits}, Grade: {course.grade}
             </CardText>
           ))}
-          <Link to="/courses/0">Manage Courses</Link>
+          <Link to={`/courses/${studentId}`}>Manage Courses</Link>
         </Card>
         <Card>
           <CardTitle>Student Info</CardTitle>
           <CardText>Name: {student.name}</CardText>
           <CardText>Wallet: {student.wallet.slice(0, 6)}...{student.wallet.slice(-4)}</CardText>
-          <Link to="/student/0">More details</Link>
+          <Link to={`/student/${studentId}`}>More details</Link>
         </Card>
       </Grid>
     </div>
