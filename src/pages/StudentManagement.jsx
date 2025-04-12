@@ -66,6 +66,14 @@ const Button = styled.button`
   }
 `;
 
+const EditButton = styled(Button)`
+  background-color: ${({ theme }) => theme.colors.secondary};
+`;
+
+const RemoveButton = styled(Button)`
+  background-color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -117,7 +125,7 @@ function StudentManagement() {
       const studentList = [];
       for (let i = 0; i < studentCount; i++) {
         const { name, age, wallet, exists } = await contract.getStudentData(i);
-        if (exists) studentList.push({ id: i, name, age, wallet });
+        if (exists) studentList.push({ id: i, name, age: age.toString(), wallet });
       }
       setStudents(studentList);
     };
@@ -218,12 +226,12 @@ function StudentManagement() {
             <CardText>Age: {student.age}</CardText>
             <CardText truncate>Wallet: {student.wallet}</CardText>
             <ButtonGroup>
-              <Button onClick={() => handleEdit(student)} color={theme.colors.secondary}>
+              <EditButton onClick={() => handleEdit(student)}>
                 Edit
-              </Button>
-              <Button onClick={() => handleRemove(student.id)} color={theme.colors.textSecondary}>
+              </EditButton>
+              <RemoveButton onClick={() => handleRemove(student.id)}>
                 Remove
-              </Button>
+              </RemoveButton>
             </ButtonGroup>
           </Card>
         ))}
