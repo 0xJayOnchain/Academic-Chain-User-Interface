@@ -39,6 +39,7 @@ const NavItem = styled(RouterLink)`
 
 const NavLabel = styled.span`
   font-size: 0.75rem;
+  text-align: center;
   margin-top: ${({ theme }) => theme.spacing.xs};
 `;
 
@@ -52,11 +53,11 @@ function Sidebar() {
         </svg>
         <NavLabel>Home</NavLabel>
       </NavItem>
-      <NavItem to="/students">
+      <NavItem to="/student-dashboard">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
         </svg>
-        <NavLabel>Students</NavLabel>
+        <NavLabel>Student Dashboard</NavLabel>
       </NavItem>
     </SidebarWrapper>
   );

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 import StudentManagement from "./pages/StudentManagement";
 import CourseManagement from "./pages/CourseManagement";
 import StudentDetails from "./pages/StudentDetails";
@@ -32,8 +32,8 @@ function App() {
           <Navbar />
           <Container>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/students" element={<StudentManagement />} />
+              <Route path="/" element={<StudentManagement />} />
+              <Route path="/student-dashboard" element={<StudentDashboard />} />
               <Route path="/courses/:studentId" element={<CourseManagement />} />
               <Route path="/student/:studentId" element={<StudentDetails />} />
             </Routes>

@@ -62,6 +62,10 @@ const Button = styled.button`
   }
 `;
 
+const RemoveButton = styled(Button)`
+  background-color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -124,7 +128,9 @@ function CourseManagement() {
         parseInt(form.grade)
       );
       setForm({ name: "", credits: "", grade: "" });
-      window.location.reload();
+      // Refetch courses instead of reloading
+      const { courses: studentCourses } = await contract.getStudentData(studentId);
+      setCourses(studentCourses);
     } catch (error) {
       console.error("Error adding course:", error);
     }
@@ -134,7 +140,9 @@ function CourseManagement() {
     try {
       const contract = await getContract();
       await contract.removeCourse(studentId, courseIndex);
-      window.location.reload();
+      // Refetch courses instead of reloading
+      const { courses: studentCourses } = await contract.getStudentData(studentId);
+      setCourses(studentCourses);
     } catch (error) {
       console.error("Error removing course:", error);
     }
@@ -192,9 +200,9 @@ function CourseManagement() {
             <CardTitle>{course.name}</CardTitle>
             <CardText>Credits: {course.credits}</CardText>
             <CardText>Grade: {course.grade}</CardText>
-            <Button onClick={() => handleRemove(index)} color={theme.colors.textSecondary}>
+            <RemoveButton onClick={() => handleRemove(index)}>
               Remove
-            </Button>
+            </RemoveButton>
           </Card>
         ))}
       </Grid>

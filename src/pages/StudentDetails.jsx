@@ -115,7 +115,7 @@ function StudentDetails() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching student data:", error);
-        setError("Failed to load student data. Please try again later.");
+        setError("Add course for student. If course already exists, please try again later.");
         setLoading(false);
       }
     };

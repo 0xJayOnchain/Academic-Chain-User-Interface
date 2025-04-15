@@ -125,7 +125,7 @@ const Button = styled.button`
   }
 `;
 
-function Dashboard() {
+function StudentDashboard() {
   const [student, setStudent] = useState(null);
   const [gpa, setGpa] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -363,4 +363,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default StudentDashboard;
