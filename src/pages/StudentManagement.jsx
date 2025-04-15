@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getContract } from "../utils/contract";
 
@@ -71,7 +72,15 @@ const EditButton = styled(Button)`
 `;
 
 const RemoveButton = styled(Button)`
+  background-color: ${({ theme }) => theme.colors.red};
+`;
+
+const MoreDetailsButton = styled(Button)`
   background-color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const AddCourseButton = styled(Button)`
+  background-color: ${({ theme }) => theme.colors.green};
 `;
 
 const Grid = styled.div`
@@ -117,6 +126,7 @@ function StudentManagement() {
   const [form, setForm] = useState({ id: "", name: "", age: "", wallet: "" });
   const [students, setStudents] = useState([]);
   const [isUpdate, setIsUpdate] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -167,6 +177,14 @@ function StudentManagement() {
       console.error("Error removing student:", error);
     }
   };
+
+    const handleMoreDetails = (id) => {
+        navigate(`/student/${id}`);
+    };
+
+    const handleAddCourse = async (id) => {
+        navigate(`/courses/${id}`);
+    };
 
   return (
     <div>
@@ -232,6 +250,12 @@ function StudentManagement() {
               <RemoveButton onClick={() => handleRemove(student.id)}>
                 Remove
               </RemoveButton>
+              <MoreDetailsButton onClick={() => handleMoreDetails(student.id)}> 
+                More Details
+              </MoreDetailsButton>
+              <AddCourseButton onClick={() => handleAddCourse(student.id)}> 
+                Add Course
+              </AddCourseButton>
             </ButtonGroup>
           </Card>
         ))}

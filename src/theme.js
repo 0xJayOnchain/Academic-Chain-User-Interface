@@ -5,6 +5,9 @@ const theme = {
       textSecondary: "#546084", // Muted blue-gray for secondary text
       white: "#ffffff", // White for card backgrounds
       textPrimary: "#434345", // Dark gray for primary text
+      red: "#FF0000", // Red for errors and remove buttons
+      yellow: '#FFFF00', // yellow for more details
+      green: '#008000' // Green for add courses
     },
     spacing: {
       xs: "0.5rem", // 8px

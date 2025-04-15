@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import { getContract } from "../utils/contract";
 
 const Nav = styled.nav`
   display: flex;
@@ -31,11 +34,32 @@ const UserAvatar = styled.div`
 `;
 
 function Navbar() {
+    // Lets force student for now
+  const studentId = 1;
+  const [studentName, setStudentName] = useState("Student");
+
+  useEffect(() => {
+    const fetchStudentName = async () => {
+      if (studentId) {
+        console.log('Student ID:', studentId);
+        try {
+          const contract = await getContract();
+          const { name } = await contract.getStudentData(studentId);
+          setStudentName(name || "Student");
+        } catch (error) {
+          console.error("Error fetching student name:", error);
+          setStudentName("Student");
+        }
+      }
+    };
+    fetchStudentName();
+  }, [studentId]);
+
   return (
     <Nav>
       <SearchBar placeholder="Search" />
       <UserInfo>
-        <span>James Dean</span>
+        <span>{studentName}</span>
         <UserAvatar />
       </UserInfo>
     </Nav>
