@@ -1,5 +1,7 @@
 # Student Management dApp
 
+Link: https://0xjayonchain.github.io/Academic-Chain-User-Interface/
+
 A decentralized application (dApp) for managing student information and course data on the Base Sepolia test network.
 
 ## Overview
